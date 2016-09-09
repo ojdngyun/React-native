@@ -13,14 +13,16 @@ import {
 } from 'react-native';
 
 var buffer = require('./buffer');
+var properties;
 
 class Login extends Component{
   constructor(props){
     super(props);
 
     this.state = {
-      showProgress: false
+      showProgress: false,
     }
+    properties = props;
   }
 
   render(){
@@ -75,38 +77,23 @@ class Login extends Component{
       console.log('Attempting to log in with username ' + this.state.username);
       this.setState({showProgress: true});
 
-      var bufferString = new buffer.Buffer(this.state.username + ':' + this.state.password);
-      var encodedAuth1 = bufferString.toString('base64');
-
-      fetch('https://api.github.com/user', {
-        headers: {
-          'Authorization' : 'Basic ' + encodedAuth1
-        }
-      })
-      .then((response) => {
-        if(response.status >= 200 && response.status < 300){
-          return response;
-        }
-        throw {
-          // console.log('error occured');
-          badCredentials: response.status == 401,
-          unknownError: response.status != 401
-        }
-      })
-      .then((response) => {
-        return response.json();
-      })
-      .then((results) => {
-        this.setState({success: true});
+      var authService = require('./AuthService');
+      authService.login({
+        username: this.state.username,
+        password: this.state.password
+      }
+      , function(results){
+        this.setState(Object.assign({
+          showProgress: false
+        }, results));
         console.log(results);
-      })
-      .catch((err) => {
-        // console.log(err);
-        this.setState(err);
-      })
-      .finally(() => {
-        this.setState({showProgress: false});
-      });
+        if(results.success && properties.onLogin){
+          properties.onLogin();
+        } else {
+          console.log('loging fail');
+        }
+      }.bind(this)
+    );
     }
   }
 };
@@ -152,7 +139,7 @@ const styles = StyleSheet.create({
     marginTop: 20
   },
   error: {
-    color: 'red', 
+    color: 'red',
     paddingTop: 10
   }
 });
