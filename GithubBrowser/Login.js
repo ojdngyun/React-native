@@ -82,7 +82,7 @@ class Login extends Component{
         username: this.state.username,
         password: this.state.password
       }
-      , function(results){
+      , (results) => {
         this.setState(Object.assign({
           showProgress: false
         }, results));
@@ -92,7 +92,7 @@ class Login extends Component{
         } else {
           console.log('loging fail');
         }
-      }.bind(this)
+      }
     );
     }
   }
