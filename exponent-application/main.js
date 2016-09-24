@@ -21,10 +21,16 @@ class App extends React.Component {
       ],
     };
   }
+
+  onAddStarted(){
+    console.log("alsdjf;als");
+  }
+
   render() {
     return (
       <TaskList
-      todos = {this.state.todos}/>
+        onAddStarted={this.onAddStarted.bind(this)}
+        todos = {this.state.todos}/>
     );
   }
 }

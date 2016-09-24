@@ -5,7 +5,10 @@ import {
   Text,
   View,
   ListView,
+  TouchableHighlight,
 } from 'react-native';
+
+import TaskRow from './TaskRow';
 
 class TaskList extends React.Component {
   constructor(props, context){
@@ -22,7 +25,7 @@ class TaskList extends React.Component {
 
   renderRow(todo){
     return (
-      <Text>{todo.task}</Text>
+      <TaskRow todo={todo}/>
     );
   }
 
@@ -33,6 +36,14 @@ class TaskList extends React.Component {
           dataSource = {this.state.dataSource}
           key = {this.props.todos}
           renderRow = {this.renderRow.bind(this)} />
+
+          <TouchableHighlight
+            onPress={this.props.onAddStarted}
+            style={styles.button}>
+            <Text style={styles.buttonText}>
+              Add one
+            </Text>
+          </TouchableHighlight>
       </View>
     );
   }
@@ -40,11 +51,29 @@ class TaskList extends React.Component {
 
 const styles = StyleSheet.create({
   container: {
-    paddingTop: 24,
+    paddingTop: 40,
+    backgroundColor: '#F7F7F7',
+    flex: 1,
+    justifyContent: 'flex-start',
   },
+  button: {
+    height: 60,
+    borderColor: '#05A5D1',
+    borderWidth: 2,
+    backgroundColor: '#333',
+    margin: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  buttonText: {
+    color: '#FAFAFA',
+    fontSize: 20,
+    fontWeight: '400',
+  }
 });
 
 TaskList.propTypes = {
+  onAddStarted: React.PropTypes.func.isRequired,
   todos: React.PropTypes.arrayOf(React.PropTypes.object).isRequired,
 };
 
