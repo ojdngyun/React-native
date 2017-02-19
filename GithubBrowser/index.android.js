@@ -1,42 +1,71 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- * @flow
- */
-
 import React, { Component } from 'react';
 import {
   AppRegistry,
   StyleSheet,
   Text,
-  View
+  View,
+  ActivityIndicator,
+  AsyncStorage
 } from 'react-native';
 
-class GithubBrowser extends Component {
-  constructor(props) {
+var Login = require('./Login');
+var AppContainer = require('./AppContainer');
+var AuthService = require('./AuthService');
+
+export default class GithubBrowser extends Component {
+  constructor(props){
     super(props);
     this.state = {
-      isLoggedIn: false
+      isLoggedIn: false,
+      checkingAuth: true
     }
+    this.onLogin = this.onLogin.bind(this);
   }
 
-  onLogin(){
-    this.setState({ isLoggedIn: true })
+  componentDidMount(){
+    console.log('checking login status')
+    AuthService.getAuthInfo((err, authInfo) => {
+      this.setState({
+        checkingAuth: false,
+        isLoggedIn: authInfo != null
+      });
+      console.log((authInfo != null) ? 'logged in' : 'not logged in');
+      console.log(err);
+      if(err == null && authInfo == null){
+        console.log('empty callback');
+      }
+    });
   }
 
   render() {
-    const Login = require('./Login');
-    if (this.state.isLoggedIn) {
-      return (
+    if(this.state.checkingAuth){
+      return(
         <View style={styles.container}>
-          <Text style={styles.welcom}>Logged In</Text>
+          <ActivityIndicator
+            animating={true}
+            size="large"
+            style={styles.loader}/>
         </View>
+      )
+    }
+    if(this.state.isLoggedIn) {
+      return (
+        <AppContainer/>
       );
+      console.log('showing loggedIn');
     } else {
+      console.log('showing login page');
       return (
         <Login onLogin={this.onLogin}/>
       );
     }
+  }
+
+  onLogin() {
+    console.log('inside onLogin');
+    this.setState({
+      isLoggedIn: true
+    });
   }
 }
 

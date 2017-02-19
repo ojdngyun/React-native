@@ -1,21 +1,70 @@
-var buffer = require('./buffer');
+//dependencies
+var buffer = require('buffer');
+var ReactNative = require('react-native');
+var {
+  AsyncStorage
+} = ReactNative;
+var _ = require('lodash');
+
+//consts
+const authKey = 'auth';
+const userKey = 'user';
 
 class AuthService{
-  login(creds, cb){
-    var bufferString = new buffer.Buffer(creds.username + ':' + creds.password);
-    var encodedAuth1 = bufferString.toString('base64');
+  getAuthInfo(callBack){
+    AsyncStorage.multiGet([authKey, userKey], (err, val) => {
+      val.map((result, index, store) => {
+        var key_1 = store[index][0];
+        var value_1 = store[index][1];
+        console.log(index, key_1, value_1);
+      });
+      console.log(val);
 
-    fetch('https://api.github.com/user', {
+      if(err){
+        return callBack(err);
+      }
+
+      if(!val){
+        return callBack();
+      }
+
+      // 'val' object returned is nested array
+      // it needs to be converted a object using lodash library
+      var zippedObj = _.zipObject(val[0], val[1]);
+      console.log(zippedObj);
+
+      // checking if zippedObj contains the authKey
+      if(!zippedObj[authKey]){
+        return callBack();
+      }
+
+      var authInfo = {
+        header: {
+          Authorization: 'Basic ' + zippedObj[authKey]
+        },
+        user: zippedObj[userKey]
+        // user: JSON.parse(zippedObj[userKey])
+      }
+
+      console.log(authInfo);
+      return callBack(null, authInfo);
+    });
+  }
+
+  login(credentials, callBack){
+    var credentialString = new buffer.Buffer(credentials.username + ':' + credentials.password);
+    const encodedAuth = (credentialString.toString('base64'));
+
+    fetch('https:api.github.com/user', {
       headers: {
-        'Authorization' : 'Basic ' + encodedAuth1
+        'Authorization' : 'Basic ' + encodedAuth
       }
     })
     .then((response) => {
-      if(response.status >= 200 && response.status < 300){
+      if(response.status >= 200 && response.status <= 300){
         return response;
       }
-      throw {
-        // console.log('error occured');
+      throw{
         badCredentials: response.status == 401,
         unknownError: response.status != 401
       }
@@ -24,17 +73,19 @@ class AuthService{
       return response.json();
     })
     .then((results) => {
-      return cb({success: true});
-      // this.setState({success: true});
-      // console.log(results);
+      console.log(encodedAuth + JSON.stringify(results));
+      // storing authentication
+      let multiset_pairs = [[authKey, JSON.stringify(encodedAuth)], [userKey, JSON.stringify(results)]]
+      AsyncStorage.multiSet(multiset_pairs, (err) => {
+        if(err){
+          throw err;
+        }
+        // returning successful login callBack
+        return callBack({success: true});
+      })
     })
     .catch((err) => {
-      return cb(err);
-      // console.log(err);
-      // this.setState(err);
-    })
-    .finally(() => {
-      this.setState({showProgress: false});
+      return callBack(err);
     });
   }
 }

@@ -12,7 +12,7 @@ import {
   View
 } from 'react-native';
 
-class GithubBrowser extends Component {
+export default class GithubBrowser extends Component {
   render() {
     return (
       <View style={styles.container}>
