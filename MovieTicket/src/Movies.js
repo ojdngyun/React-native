@@ -1,14 +1,27 @@
 import React, { Component } from 'react';
 import moment from 'moment';
 import {
+  ActivityIndicator,
+  RefreshControl,
   ScrollView,
   Text,
   View,
   StyleSheet,
 } from 'react-native';
-import { movies } from './data';
+import { connect } from 'react-redux';
+// import { movies } from './data';
 import MoviePoster from './MoviePoster';
 import MoviePopup from './MoviePopup';
+
+@connect(
+  state => ({
+    movies: state.movies,
+    loading: state.loading,
+  }),
+  dispatch => ({
+    refresh: () => dispatch({type: 'GET_MOVIE_DATA'}),
+  }),
+)
 
 export default class Movies extends Component {
   state = {
@@ -66,18 +79,29 @@ export default class Movies extends Component {
   }
 
   render() {
+    const { movies, loading, refresh } = this.props;
     return (
       <View style={styles.container}>
-        <ScrollView
+        {movies
+        ? <ScrollView
           contentContainerStyle={styles.scrollContent}
           // hide all scroll indicators
           showsHorizontalScrollIndicator={false}
-          showsVerticalScrollIndicator={false}>
+          showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl
+              refreshing={loading}
+              onRefresh={refresh}/>
+          }>
             {movies.map((movie, index) => <MoviePoster
               movie={movie}
               onOpen={this.openMoviePopup}
               key={index}/>)}
           </ScrollView>
+        : <ActivityIndicator
+            animating={loading}
+            style={styles.loader}
+            size="large"/> }
           <MoviePopup
             movie={this.state.movie}
             isOpen={this.state.popupIsOpen}
@@ -95,6 +119,11 @@ export default class Movies extends Component {
 const styles = StyleSheet.create({
   container: {
     paddingTop: 20,         // start below status bar
+  },
+  loader: {
+    flex: 1,
+    alignItems: 'center',   // center horizontally
+    justifyContent: 'center', // center vertically
   },
   scrollContent: {
     flexDirection: 'row',   // arrange posters in rows
