@@ -9,30 +9,29 @@ import {
   StatusBar,
   Text,
   TouchableWithoutFeedback,
-  View
+  View,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 
-// Get screen dimensions
+// get screen dimensions
 const { width, height } = Dimensions.get('window');
 
 export default class Messages extends Component {
-
-  // Define prop types
+  // define prop types
   static propTypes = {
-    // Pass messages to show as children
+    // pass messages to show as children
     children: PropTypes.any,
-    // Whether the window is open or not
+    // whether the window is open or not
     isOpen: PropTypes.bool,
-    // Header that shows up on top the screen when opened
+    // header that shows up on top of the screen when opened
     header: PropTypes.string,
-    // Header height
+    // header height
     headerHeight: PropTypes.number,
-    // Height of the visible teaser area at the bottom of the screen
+    // heaght of the visible teaser are at the botto of the screen
     teaserHeight: PropTypes.number,
   };
 
-  // Set default prop values
+  // set default prop values
   static defaultProps = {
     isOpen: false,
     header: 'Messages',
@@ -40,80 +39,82 @@ export default class Messages extends Component {
     teaserHeight: 75,
   };
 
-  // Define state
+  // define state
   state = {
-    // Whether it's open or not
+    // whether it's open or not
     open: false,
-    // Whether the window is being pulled up/down or not
+    // whether the window is being pulled up/down or not
     pulling: false,
-    // Zero means user haven't scrolled the content yet
+    // zero means user hasn't scrolled the content yet
     scrollOffset: 0,
   };
 
-  // Configure animations
+  // animation configuration
   config = {
-    // Window position
+    // window position
     position: {
-      // maximum possible value - the bottom edge of the screen
+      // maximum possible value - bottom edge of the screen
       max: height,
       // starting value - teaserHeight higher than the bottom of the screen
       start: height - this.props.teaserHeight,
-      // end value - headerHeight lower than the top of the screen
+      // end value - header height lower than the top of the screen
       end: this.props.headerHeight,
-      // minimal possible value - a bit lower the top of the screen
+      // minimum possible value - a bit lower than the top of the screen
       min: this.props.headerHeight,
-      // When animated triggers these value updates
+      // when animation is triggered, these value updates
       animates: [
         () => this._animatedOpacity,
         () => this._animatedWidth
       ]
     },
-    // Window width
+
+    // window width
     width: {
       end: width,         // takes full with once opened
-      start: width - 20,  // slightly narrower than screen when closed
+      start: width - 20,  // slightly narrower than the screen when closed
     },
-    // Window backdrop opacity
+
+    // window backdrop opacity
     opacity: {
-      start: 0,   // fully transparent when closed
-      end: 1      // not transparent once opened
+      start: 0,       // fully transparent when closed
+      end: 1,         // not transparent once opened
     },
   };
 
-  // Pan responder to handle gestures
+  // pan responder to handle gestures
   _panResponder = {};
 
-  // Animates backdrop opacity
+  // animate backdrop opacity
   _animatedOpacity = new Animated.Value(this.config.opacity.start);
 
-  // Animates window width
+  // animate window width
   _animatedWidth = new Animated.Value(this.config.width.start);
 
-  // Animates window position
+  // animate window position
   _animatedPosition = new Animated.Value(this.props.isOpen
-    ? this.config.position.end
-    : this.config.position.start);
+  ? this.config.position.end
+  : this.config.position.start);
 
   componentWillMount() {
-    // Set current position
+    // set current position
     this._currentPosition = this._animatedPosition._value;
-    // Listen for this._animatedPosition changes
+    // listen for this._animatedPosition changes
     this._animatedPosition.addListener((value) => {
-      // Update _currentPosition
+      // update _current position
       this._currentPosition = value.value;
-      // Animate depending values
+      // animate depending on values
       this.config.position.animates.map(item => {
         item().setValue(value.value);
       })
     });
-    // Reset value once listener is registered to update depending animations
+    // reset value once listener is registered to update depending animations
     this._animatedPosition.setValue(this._animatedPosition._value);
-    // Initialize PanResponder to handle gestures
+    // initialize PanResponder to handle gestures
     this._panResponder = PanResponder.create({
-      onStartShouldSetPanResponder: this._grantPanResponder,
+      onStartShouldSetPanResponder: this._grantpanResponder,
       onStartShouldSetPanResponderCapture: this._grantPanResponder,
       onMoveShouldSetPanResponder: this._grantPanResponder,
-      onMoveShouldSetPanResponderCapture: this._grantPanResponder,
+      onMoveshouldSetPanResponderCapture: this._grantPanResponder,
       onPanResponderGrant: this._handlePanResponderGrant,
       onPanResponderMove: this._handlePanResponderMove,
       onPanResponderTerminationRequest: (evt, gestureState) => true,
@@ -123,178 +124,177 @@ export default class Messages extends Component {
     });
   }
 
-  // Handle isOpen prop changes to either open or close the window
+  // handle isOpen prop changes to either open or close the window
   componentWillReceiveProps(nextProps) {
-    // isOpen prop changed to true from false
     if (!this.props.isOpen && nextProps.isOpen) {
+      // isOPen prop changed to true from false
       this.open();
-    }
-    // isOpen prop changed to false from true
-    else if (this.props.isOpen && !nextProps.isOpen) {
+    } else if (this.props.isOpen && !nextProps.isOpen) {
+      // isOpen prop has changed to false from true
       this.close();
     }
   }
 
   render() {
     const { children, header } = this.props,
-      // Interpolate position value into opacity value
-      animatedOpacity = this._animatedOpacity.interpolate({
-        inputRange: [this.config.position.end, this.config.position.start],
-        outputRange: [this.config.opacity.end, this.config.opacity.start],
-      }),
-      // Interpolate position value into width value
-      animatedWidth = this._animatedWidth.interpolate({
-        inputRange: [this.config.position.min,// top of the screen
-          this.config.position.start - 50,    // 50 pixels higher than next point
-          this.config.position.start,         // a bit higher than the bottom of the screen
-          this.config.position.max            // the bottom of the screen
-        ],
-        outputRange: [this.config.width.end,  // keep max width after next point
-          this.config.width.end,              // end: max width at 50 pixel higher
-          this.config.width.start,            // start: min width at the bottom
-          this.config.width.start             // keep min width before previous point
-        ],
-      });
+    // interpolate position value into opacity value
+    // this will change the opacity of the overlay on the background
+    // as the window moves across the screen
+    animatedOpacity = this._animatedOpacity.interpolate({
+      inputRange: [this.config.position.end, this.config.position.start],
+      outputRange: [this.config.opacity.end, this.config.opacity.start],
+    }),
+    // interpolate position value into width
+    // changes the width of the window from slightly smaller than the screen
+    // to full width when the window is fully open
+    animatedWidth = this._animatedWidth.interpolate({
+      inputRange: [this.config.position.min,  // top of the screen
+        this.config.position.start - 50,      // 50 pixels higher than the next point
+        this.config.position.start,           // a bit higher than the bottom of the screen
+        this.config.position.max              // bottom of the screen
+      ],
+      outputRange: [this.config.width.end,    // keep max width after next point
+        this.config.width.end,                // end: max width at 50 pixel higher
+        this.config.width.start,              // start: min width at the bottom
+        this.config.width.start               // keep min width before previous point
+      ],
+    });
     return (
       <Animated.View style={[styles.container, this.getContainerStyle()]}>
-        {/* Use light status bar because we have dark background */}
+        {/* use light status coz of dark background */}
         <StatusBar barStyle={"light-content"} />
-        {/* Backdrop with animated opacity */}
+        {/* backdrop with animated opacity */}
         <Animated.View style={[styles.backdrop, { opacity: animatedOpacity }]}>
-          {/* Close window when tapped on header */}
+          {/* ...........................tappable header */}
           <TouchableWithoutFeedback onPress={this.close}>
             <View style={[styles.header, this.getHeaderStyle()]}>
-              {/* Icon */}
+              {/* icon */}
               <View style={styles.headerIcon}>
-                <Icon name="md-arrow-up" size={24} color="white" />
-              </View>
-              {/* Header */}
-              <View style={styles.headerTitle}>
-                <Text style={styles.headerText}>{header}</Text>
+                <Icon name="md-arrow-up" size={24} color="white"/>
+                {/* header */}
+                <View style={styles.headerTitle}>
+                  <Text style={styles.headerText}>{header}</Text>
+                </View>
               </View>
             </View>
           </TouchableWithoutFeedback>
         </Animated.View>
-        {/* Content container */}
+        {/* ......................content container */}
         <Animated.View
           style={[styles.content, {
-            // Add padding at the bottom to fit all content on the screen
+            // add padding at the bottom to fit all content on the screen
             paddingBottom: this.props.headerHeight,
-            // Animate width
+            // animate width
             width: animatedWidth,
-            // Animate position on the screen
+            // animate position on the screen
             transform: [{ translateY: this._animatedPosition }, { translateX: 0 }]
           }]}
-          // Handle gestures
-          {...this._panResponder.panHandlers}
-        >
-          {/* Put all content in a scrollable container */}
-          <ScrollView
-            ref={(scrollView) => { this._scrollView = scrollView; }}
-            // Enable scrolling only when the window is open
-            scrollEnabled={this.state.open}
-            // Hide all scrolling indicators
-            showsHorizontalScrollIndicator={false}
-            showsVerticalScrollIndicator={false}
-            // Trigger onScroll often
-            scrollEventThrottle={16}
-            onScroll={this._handleScroll}
-          >
-            {/* Render children components */}
-            {children}
-          </ScrollView>
-        </Animated.View>
+          // .....................adding panResponder handler to handle gestures
+          {...this._panResponder.panHandlers}>
+            {/* put all content in a scrollable container */}
+            <ScrollView
+              ref={(scrollView) => { this._scrollView = scrollView; }}
+              // enable scrolling only when the window is open
+              scrollEnabled={this.state.open}
+              // hide all side scroll indicator
+
+              // showsHorizontalScrollIndicator={false}
+              // showsVerticalScrollIndicator={false}
+
+              // trigger onScroll often
+              scrollEventThrottle={16}
+              onScroll={this._handleScroll}>
+                {/* render children */}
+                {children}
+              </ScrollView>
+          </Animated.View>
       </Animated.View>
     );
   }
 
-  // Either allow or deny gesture handler
+  // either allow or deny gesture handler
   _grantPanResponder = (evt, gestureState) => {
-    // Allow if is not open
     if (!this.state.open) {
+      // allow if is not open
       return true;
-    }
-    // Allow if user haven't scroll the content yet
-    else if (this.pulledDown(gestureState) && this.state.scrollOffset <= 0) {
+    } else if (this.pulledDown(gestureState) && this.state.scrollOffset <= 0) {
+      // allow if user haven't scrolled the content yet
       return true;
-    }
-    // Allow if pulled down rapidly
-    else if (this.pulledDown(gestureState) && this.pulledFast(gestureState)) {
+    } else if (this.pulledDown(gestureState) && this.pulledFast(gestureState)) {
+      // allow if pulled down rapidly
       return true;
+    } else {
+      // deny otherwise
+      return false;
     }
-    // Deny otherwise
-    return false;
   };
 
-  // Called when granted
-  _handlePanResponderGrant = (evt, gestureState) => {
-    // Update the state so we know we're in the middle of pulling it
-    this.setState({ pulling: true });
-    // Set offset and initialize with 0 so we update it
+  // called when gesture is allowed to be handled
+  _handlePanResponderGrant = (evt, gesture) => {
+    // update the state so we know we're in the middle of pulling it
+    this.setState({ pulling: true});
+    // set offset and initialize with 0 so we update it
     // with relative values from gesture handler
     this._animatedPosition.setOffset(this._currentPosition);
     this._animatedPosition.setValue(0);
   };
 
-  // Called when being pulled
+  // called during the gesture
   _handlePanResponderMove = (evt, gestureState) => {
-    // Update position unless we go outside of allowed range
+    // update position unless we go outside of allowed range
     if (this.insideAllowedRange()) {
       this._animatedPosition.setValue(gestureState.dy);
     }
   };
 
-  // Called when gesture ended
+  // called at the end of the gesture
   _handlePanResponderEnd = (evt, gestureState) => {
-    // Reset offset
+    // reset offset
     this._animatedPosition.flattenOffset();
-    // Reset pulling state
+    // reset pulling state
     this.setState({ pulling: false });
-    // Pulled down and far enough to trigger close
     if (this.pulledDown(gestureState) && this.pulledFar(gestureState)) {
+      // pulled down far enough to trigger a close
       return this.close();
-    }
-    // Pulled up and far enough to trigger open
-    else if (this.pulledUp(gestureState) && this.pulledFar(gestureState)) {
+    } else if (this.pulledUp(gestureState) && this.pulledFar(gestureState)) {
+      // pulled up far enough to trigger open
       return this.open();
-    }
-    // Toggle if tapped
-    else if (this.tapped(gestureState)) {
+    } else if (this.tapped(gestureState)) {
+      // toggle if tapped
       return this.toggle();
-    }
-    // Restore back to appropriate position otherwise
-    else {
+    } else {
+      // restore back to appropriate position otherwise
       this.restore();
     }
   };
 
-  // Handle content scrolling
+  // handle content scrolling
   _handleScroll = event => {
     const { y } = event.nativeEvent.contentOffset;
     this.setState({ scrollOffset: y });
   };
 
-  // Check if gesture was a tap
+  // check if gesture was a tap
   tapped = (gestureState) => gestureState.dx === 0 && gestureState.dy === 0;
 
-  // Check if pulled up
+  // check if pulled up
   pulledUp = (gestureState) => gestureState.dy < 0;
 
-  // Check if pulled down
+  // check if pulled down
   pulledDown = (gestureState) => gestureState.dy > 0;
 
-  // Check if pulled rapidly
+  // check if pulled rapidly
   pulledFast = (gestureState) => Math.abs(gestureState.vy) > 0.75;
 
-  // Check if pulled far
+  // check if pulled far
   pulledFar = (gestureState) => Math.abs(gestureState.dy) > 50;
 
-  // Check if current position is inside allowed range
+  // check if current position is inside allowed range
   insideAllowedRange = () =>
     this._currentPosition >= this.config.position.min
     && this._currentPosition <= this.config.position.max;
 
-  // Open up the window on full screen
+  // open up the window on full screen
   open = () => {
     this.setState({ open: true }, () => {
       Animated.timing(this._animatedPosition, {
@@ -304,9 +304,9 @@ export default class Messages extends Component {
     });
   };
 
-  // Minimize window and keep a teaser at the bottom
+  // minimize window and keep a teaser at the bottom
   close = () => {
-    this._scrollView.scrollTo({ y: 0 });
+    this._scrollView.scrollTo({ y: 0});
     Animated.timing(this._animatedPosition, {
       toValue: this.config.position.start,
       duration: 400,
@@ -315,65 +315,63 @@ export default class Messages extends Component {
     }));
   };
 
-  // Toggle window state between opened and closed
+  // toggle window state between opened and closed
   toggle = () => {
     if (!this.state.open) {
       this.open();
-    }
-    else {
+    } else {
       this.close();
     }
   };
 
-  // Either open or close depending on the state
+  // either open or close depending on the state
   restore = () => {
     if (this.state.open) {
       this.open();
-    }
-    else {
+    } else {
       this.close();
     }
-  };
+  }
 
-  // Get header style
+  // get header style
   getHeaderStyle = () => ({
-    height: Platform.OS === 'ios'
-      ? this.props.headerHeight
-      : this.props.headerHeight - 40, // compensate for the status bar
+    height: Platform.os === 'ios'
+    ? this.props.headerHeight
+    : this.props.headerHeight - 40, // component for the status bar
   });
 
-  // Get container style
+  // get container style
   getContainerStyle = () => ({
-    // Move the view below others if not open or moving
+    // move the view below others if not open or moving
     // to not block gesture handlers on other views
     zIndex: this.state.pulling || this.state.open ? 1 : -1,
   });
 }
 
 const styles = StyleSheet.create({
-  // Main container
+  // main container
   container: {
-    ...StyleSheet.absoluteFillObject,   // fill up all screen
-    alignItems: 'center',               // center children
-    justifyContent: 'flex-end',         // align popup at the bottom
-    backgroundColor: 'transparent',     // transparent background
+    ...StyleSheet.absoluteFillObject,     // fill up all screen
+    alignItems: 'center',                 // center children
+    justifyContent: 'flex-end',           // align popup at the bottom
+    backgroundColor: 'transparent',       // transparent background
   },
-  // Semi-transparent background below popup
+  // semi-transparent background below popup
   backdrop: {
-    ...StyleSheet.absoluteFillObject,   // fill up all screen
-    alignItems: 'center',               // center children
-    justifyContent: 'flex-start',       // align popup at the bottom
+    ...StyleSheet.absoluteFillObject,     // fill upll all screen
+    alignItems: 'center',                 // center children
+    justifyContent: 'flex-start',         // align popup at the bottom
     backgroundColor: 'black',
   },
-  // Body
+  // body
   content: {
     backgroundColor: 'black',
     height: height,
   },
-  // Header
+  // header
   header: {
-    flexDirection: 'row',               // arrange children in a row
-    alignItems: 'center',               // center vertically
+    flexDirection: 'row',                 // arrange children in a row
+    alignItems: 'center',                 // center vertically
     paddingTop: 20,
     paddingHorizontal: 20,
   },
@@ -381,7 +379,7 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
   headerTitle: {
-    flex: 1,                            // take up all available space
+    flex: 1,
   },
   headerText: {
     color: 'white',
