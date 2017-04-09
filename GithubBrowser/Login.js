@@ -1,8 +1,5 @@
-'use strict';
-
-import React, { Component } from 'react';
+import React, { Component, PropTypes } from 'react';
 import {
- AppRegistry,
  StyleSheet,
  Text,
  View,
@@ -10,57 +7,62 @@ import {
  TextInput,
  Dimensions,
  TouchableHighlight,
- ActivityIndicator
+ ActivityIndicator,
 } from 'react-native';
 
-var buffer = require('./buffer');
+import buffer from './buffer';
+import authService from './AuthService';
 
 var width = Dimensions.get('window').width;
 
-class Login extends Component{
-  constructor(props){
+class Login extends Component {
+  constructor(props) {
     super(props);
     this.state = {
       showProgress: false,
-      success: false
-    }
+      success: false,
+    };
   }
 
-  render(){
-    var errorControl = <View/>;
+  render() {
+    var errorControl = <View />;
     var message = null;
-    if(!this.state.success){
-      if(this.state.badCredentials){
+    if (!this.state.success) {
+      if (this.state.badCredentials) {
         message = 'That username and password combination did not work!';
-      } else if(this.state.unknowError){
+      } else if (this.state.unknowError) {
         message = 'Oops! Something went wrong!';
-      } else if(this.state.nothingWasInput){
+      } else if (this.state.nothingWasInput) {
         message = 'Empty input!';
       }
     }
-    errorControl = <Text style={styles.error}>
+    errorControl = (<Text style={styles.error}>
       {message}
-    </Text>;
+    </Text>);
 
     return (
       <View style={styles.container}>
         <Image style={styles.logo}
-          source={require('./Octocat.png')}/>
+          source={require('./Octocat.png')}
+        />
         <Text style={styles.heading}>
           Github Browser
         </Text>
         <TextInput
-          onChangeText = {(textInput) => this.setState({username: textInput})}
+          onChangeText={textInput => this.setState({ username: textInput })}
           style={styles.input}
-          placeholder = "Username"/>
+          placeholder="Username"
+        />
         <TextInput
-          onChangeText = {(passwordInput) => this.setState({password: passwordInput})}
+          onChangeText={passwordInput => this.setState({ password: passwordInput })}
           style={styles.input}
-          placeholder = "Password"
-          secureTextEntry = {true}/>
+          placeholder="Password"
+          secureTextEntry
+        />
         <TouchableHighlight
           onPress={this.onLoginPressed.bind(this)}
-          style={styles.button}>
+          style={styles.button}
+        >
           <Text style={styles.buttonText}>
             Login
           </Text>
@@ -69,59 +71,66 @@ class Login extends Component{
         {errorControl}
 
         <ActivityIndicator
-          style = {[styles.loader, {opacity: this.state.showProgress ? 1.0 : 0.0}]}
-          color= "red"
-          size="large"/>
+          style={[styles.loader, { opacity: this.state.showProgress ? 1.0 : 0.0 }]}
+          color="red"
+          size="large"
+        />
       </View>
     );
   }
 
-  onLoginPressed(){
+  onLoginPressed() {
     this.setState({
       nothingWasInput: false,
       badCredentials: false,
       unknownError: false,
-      success: false
-    })
+      success: false,
+    });
 
-    if (this.state.username == null || this.state.password == null || this.state.username == '' || this.state.password == ''){
-      this.setState({nothingWasInput: true});
+    if (this.state.username == null
+      || this.state.password == null
+      || this.state.username === ''
+      || this.state.password === '') {
+      this.setState({ nothingWasInput: true });
       return;
       // console.log('Attempting to log in: ' + this.state.username + ' ' + this.state.password);
     }
-    this.setState({showProgress: true});
+    this.setState({ showProgress: true });
 
-    var authService = require('./AuthService');
     authService.login({
       username: this.state.username,
-      password: this.state.password
+      password: this.state.password,
     }, (results) => {
       this.setState(Object.assign({
-        showProgress: false
+        showProgress: false,
       }, results));
 
-      if(results.success && this.props.onLogin){
+      if (results.success && this.props.onLogin) {
         this.props.onLogin();
       }
     });
   }
 }
 
+Login.propTypes = {
+  onLogin: PropTypes.func,
+};
+
 const styles = StyleSheet.create({
   container: {
     backgroundColor: '#F5FCFF',
     flex: 1,
     alignItems: 'center',
-    padding: 10
+    padding: 10,
   },
   logo: {
     width: 80,
     height: 66,
-    marginTop: 10
+    marginTop: 10,
   },
   heading: {
     fontSize: 30,
-    marginTop: 10
+    marginTop: 10,
   },
   input: {
     height: 50,
@@ -132,7 +141,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     borderWidth: 1,
     borderColor: '#48bbec',
-    borderRadius: 3
+    borderRadius: 3,
   },
   button: {
     height: 50,
@@ -141,18 +150,18 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginTop: 10,
-    borderRadius: 3
+    borderRadius: 3,
   },
   buttonText: {
     fontSize: 22,
-    color: '#FFF'
+    color: '#FFF',
   },
   loader: {
-    marginTop: 20
+    marginTop: 20,
   },
   error: {
-    color: 'red'
-  }
+    color: 'red',
+  },
 });
 
 module.exports = Login;

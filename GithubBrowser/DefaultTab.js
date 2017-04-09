@@ -49,7 +49,7 @@ const DefaultTabBar = React.createClass({
     >
       <View style={[styles.tab, this.props.tabStyle, ]}>
         <Image
-          style={{height: 30, width: 30}}
+          style={{height: 20, width: 20}}
           source={require('./Octocat.png')}/>
         <Text style={[{flex: 1, color: textColor, fontWeight, }, textStyle, ]}>
           {name}
@@ -79,7 +79,7 @@ const DefaultTabBar = React.createClass({
           const renderTab = this.props.renderTab || this.renderTab;
           return renderTab(name, page, isTabActive, this.props.goToPage);
         })}
-        <Animated.View style={[tabUnderlineStyle, { left, }, this.props.underlineStyle, ]} />
+        <Animated.View style={[tabUnderlineStyle, { left,}, this.props.underlineStyle, ]} />
       </View>
     );
   },

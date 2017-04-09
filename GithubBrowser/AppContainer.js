@@ -1,67 +1,92 @@
-'use strict';
-
 import React, { Component } from 'react';
 import {
- AppRegistry,
  StyleSheet,
+ Platform,
  Text,
  View,
  Image,
- TextInput,
  TouchableHighlight,
- ActivityIndicator,
  TouchableOpacity,
- TouchableNativeFeedback
+ TouchableNativeFeedback,
 } from 'react-native';
 
-var ScrollableTabView = require('react-native-scrollable-tab-view');
-var DefaultTab = require('./DefaultTab');
+import ScrollableTabView from 'react-native-scrollable-tab-view';
+import DefaultTab from './DefaultTab';
 
-class AppContainer extends Component{
-  constructor(props){
+class AppContainer extends Component {
+
+  constructor(props) {
     super(props);
     this.state = {
-      selectedTab: 'feed'
-    }
+      selectedTab: 'feed',
+    };
 
     this.onPress = this.onPress.bind(this);
   }
 
-  render(){
+  onPress(value) {
+    console.log(value);
+  }
+
+  getButtonView() {
     return (
-      // <View style={styles.container}>
-      //   <Text style={styles.welcome}>
-      //   </Text>
-      // </View>
+      <View
+        style={{ width: 150, height: 100, backgroundColor: 'gray' }}
+      >
+        <Image
+          style={{ height: 50, width: 50 }}
+          source={require('./Octocat.png')}
+        />
+      </View>
+    );
+  }
+
+  getTouchableView() {
+    if (Platform.OS === 'ios') {
+      return (
+        <TouchableHighlight
+          tabLabel='Button'
+          onPress={this.onPress(0)}
+        >
+          {this.getButtonView()}
+        </TouchableHighlight>
+      );
+    } else if (Platform.OS === 'android') {
+      return (
+        <TouchableNativeFeedback
+          // tabLabel='Button'
+          background={TouchableNativeFeedback.SelectableBackground()}
+          onPress={this.onPress(0)}
+        >
+          {this.getButtonView()}
+        </TouchableNativeFeedback>
+      );
+    }
+    return null;
+  }
+
+  render() {
+    return (
       <ScrollableTabView
         style={styles.container}
         renderTabBar={() => <DefaultTab />}
-        ref={(tabView) => {this.tabView = tabView;}}>
-        <Text tabLabel='Tab #1'
+        ref={(tabView) => { this.tabView = tabView; }}>
+        <Text
+          tabLabel="Tab #1"
           style={styles.text}>page one</Text>
-        <Text tabLabel='Tab #2'
+        <Text
+          tabLabel="Tab #2"
           style={styles.text}>page two</Text>
-        <Text tabLabel='Tab #3'
+        <Text
+          tabLabel="Tab #3"
           style={styles.text}>page three</Text>
-        <TouchableNativeFeedback tabLabel='Button'
-          background={TouchableNativeFeedback.SelectableBackground()}
-          onPress={this.onPress(0)}>
-          <View
-            style={{width: 150, height: 100, backgroundColor: 'gray'}}>
-            <Image style={{height: 50, width: 50}}
-              source={require('./Octocat.png')}/>
-          </View>
-        </TouchableNativeFeedback>
-        <TouchableOpacity tabLabel='Back' onPress={() => this.tabView.goToPage(0)}>
+          {this.getTouchableView()}
+        <TouchableOpacity tabLabel="Back" onPress={() => this.tabView.goToPage(0)}>
           <Image style={{height: 50, width: 50}}
             source={require('./Octocat.png')}/>
         </TouchableOpacity>
       </ScrollableTabView>
     );
-  }
-
-  onPress(value){
-    console.log(value);
   }
 }
 
@@ -71,6 +96,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#F5FCFF',
+    marginTop: (Platform.OS === 'ios') ? 20 : 0,
   },
   welcome: {
     fontSize: 20,
@@ -85,14 +111,14 @@ const styles = StyleSheet.create({
   page: {
     flex: 0.1,
     flexDirection: 'column',
-    backgroundColor: 'red'
+    backgroundColor: 'red',
   },
   text: {
     flex: 1,
     fontSize: 25,
     color: 'red',
-    backgroundColor: 'black'
-  }
+    backgroundColor: 'black',
+  },
 });
 
 module.exports = AppContainer;
