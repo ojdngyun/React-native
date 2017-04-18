@@ -8,12 +8,13 @@ import {
  TouchableHighlight,
  TouchableOpacity,
  TouchableNativeFeedback,
+ TabBarIOS,
 } from 'react-native';
 
 import ScrollableTabView from 'react-native-scrollable-tab-view';
 import DefaultTab from './DefaultTab';
 
-class AppContainer extends Component {
+export default class AppContainer extends Component {
 
   constructor(props) {
     super(props);
@@ -65,7 +66,7 @@ class AppContainer extends Component {
     return null;
   }
 
-  render() {
+  getTabView() {
     return (
       <ScrollableTabView
         style={styles.container}
@@ -86,6 +87,35 @@ class AppContainer extends Component {
             source={require('./Octocat.png')}/>
         </TouchableOpacity>
       </ScrollableTabView>
+    );
+  }
+
+  getIOSTabView() {
+    return (
+      <TabBarIOS style={styles.container}>
+        <TabBarIOS.Item
+          title="feed"
+          selected={this.state.selectedTab === 'feed'}
+          // icon={require('image!inbox')}
+          onPress={() => this.setState({ selectedTab: 'feed' })}
+        >
+          <Text style={styles.welcome}>Tab 1</Text>
+        </TabBarIOS.Item>
+        <TabBarIOS.Item
+          title="search"
+          selected={this.state.selectedTab === 'search'}
+          // icon={require('image!inbox')}
+          onPress={() => this.setState({ selectedTab: 'search' })}
+        >
+          <Text style={styles.welcome}>Tab 2</Text>
+        </TabBarIOS.Item>
+      </TabBarIOS>
+    )
+  }
+
+  render() {
+    return (
+      ((Platform.OS === 'ios') ? this.getIOSTabView() : this.getTabView())
     );
   }
 }
@@ -120,5 +150,3 @@ const styles = StyleSheet.create({
     backgroundColor: 'black',
   },
 });
-
-module.exports = AppContainer;
