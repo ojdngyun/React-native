@@ -43,7 +43,7 @@ class Login extends Component {
     return (
       <View style={styles.container}>
         <Image style={styles.logo}
-          source={require('./Octocat.png')}
+          source={require('./res/Octocat.png')}
         />
         <Text style={styles.heading}>
           Github Browser

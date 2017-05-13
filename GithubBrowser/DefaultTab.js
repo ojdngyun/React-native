@@ -9,6 +9,10 @@ const {
 } = ReactNative;
 const Button = require('./Button');
 
+const imageInbox = require('./res/Inbox.png');
+const imageSearch = require('./res/Search.png');
+const imageOctocat = require('./res/Octocat.png');
+
 const DefaultTabBar = React.createClass({
   propTypes: {
     goToPage: React.PropTypes.func,
@@ -21,6 +25,7 @@ const DefaultTabBar = React.createClass({
     tabStyle: View.propTypes.style,
     renderTab: React.PropTypes.func,
     underlineStyle: View.propTypes.style,
+    image: React.PropTypes.string,
   },
 
   getDefaultProps() {
@@ -31,27 +36,41 @@ const DefaultTabBar = React.createClass({
     };
   },
 
+  getTabImage(name) {
+    switch (name) {
+      case 'Inbox':
+        return imageInbox;
+      case 'Search':
+        return imageSearch;
+      default:
+        return imageOctocat;
+    }
+  },
+
   renderTabOption(name, page) {
   },
 
   renderTab(name, page, isTabActive, onPressHandler) {
-    const { activeTextColor, inactiveTextColor, textStyle, } = this.props;
+    const { activeTextColor, inactiveTextColor, textStyle } = this.props;
     const textColor = isTabActive ? activeTextColor : inactiveTextColor;
     const fontWeight = isTabActive ? 'bold' : 'normal';
 
+    const tabImage = this.getTabImage(name);
+
     return <Button
-      style={{flex: 1, }}
+      style={{ flex: 1 }}
       key={name}
-      accessible={true}
+      accessible
       accessibilityLabel={name}
-      accessibilityTraits='button'
+      accessibilityTraits="button"
       onPress={() => onPressHandler(page)}
     >
-      <View style={[styles.tab, this.props.tabStyle, ]}>
+      <View style={[styles.tab, this.props.tabStyle]}>
         <Image
-          style={{height: 20, width: 20}}
-          source={require('./Octocat.png')}/>
-        <Text style={[{flex: 1, color: textColor, fontWeight, }, textStyle, ]}>
+          style={{ height: 20, width: 20, marginTop: 5 }}
+          source={tabImage}
+        />
+        <Text style={[{ flex: 1, color: textColor, fontWeight }, textStyle]} >
           {name}
         </Text>
       </View>
@@ -70,16 +89,16 @@ const DefaultTabBar = React.createClass({
     };
 
     const left = this.props.scrollValue.interpolate({
-      inputRange: [0, 1, ], outputRange: [0,  containerWidth / numberOfTabs, ],
+      inputRange: [0, 1], outputRange: [0,  containerWidth / numberOfTabs],
     });
     return (
-      <View style={[styles.tabs, {backgroundColor: this.props.backgroundColor, }, this.props.style, ]}>
+      <View style={[styles.tabs, { backgroundColor: this.props.backgroundColor }, this.props.style]}>
         {this.props.tabs.map((name, page) => {
           const isTabActive = this.props.activeTab === page;
           const renderTab = this.props.renderTab || this.renderTab;
           return renderTab(name, page, isTabActive, this.props.goToPage);
         })}
-        <Animated.View style={[tabUnderlineStyle, { left,}, this.props.underlineStyle, ]} />
+        <Animated.View style={[tabUnderlineStyle, { left }, this.props.underlineStyle]} />
       </View>
     );
   },
@@ -93,7 +112,7 @@ const styles = StyleSheet.create({
     paddingBottom: 10,
   },
   tabs: {
-    height: 50,
+    height: 55,
     flexDirection: 'row',
     justifyContent: 'space-around',
     borderWidth: 1,

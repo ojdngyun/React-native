@@ -14,6 +14,10 @@ import {
 import ScrollableTabView from 'react-native-scrollable-tab-view';
 import DefaultTab from './DefaultTab';
 
+const imageOctocat = require('./res/Octocat.png');
+const imageSearch = require('./res/Search.png');
+const imageInbox = require('./res/Inbox.png');
+
 export default class AppContainer extends Component {
 
   constructor(props) {
@@ -36,7 +40,7 @@ export default class AppContainer extends Component {
       >
         <Image
           style={{ height: 50, width: 50 }}
-          source={require('./Octocat.png')}
+          source={imageOctocat}
         />
       </View>
     );
@@ -46,7 +50,7 @@ export default class AppContainer extends Component {
     if (Platform.OS === 'ios') {
       return (
         <TouchableHighlight
-          tabLabel='Button'
+          tabLabel="Inbox"
           onPress={this.onPress(0)}
         >
           {this.getButtonView()}
@@ -55,7 +59,7 @@ export default class AppContainer extends Component {
     } else if (Platform.OS === 'android') {
       return (
         <TouchableNativeFeedback
-          // tabLabel='Button'
+          tabLabel="Inbox"
           background={TouchableNativeFeedback.SelectableBackground()}
           onPress={this.onPress(0)}
         >
@@ -71,21 +75,21 @@ export default class AppContainer extends Component {
       <ScrollableTabView
         style={styles.container}
         renderTabBar={() => <DefaultTab />}
-        ref={(tabView) => { this.tabView = tabView; }}>
-        <Text
-          tabLabel="Tab #1"
-          style={styles.text}>page one</Text>
-        <Text
-          tabLabel="Tab #2"
-          style={styles.text}>page two</Text>
-        <Text
-          tabLabel="Tab #3"
-          style={styles.text}>page three</Text>
-          {this.getTouchableView()}
-        <TouchableOpacity tabLabel="Back" onPress={() => this.tabView.goToPage(0)}>
-          <Image style={{height: 50, width: 50}}
-            source={require('./Octocat.png')}/>
+        ref={(tabView) => { this.tabView = tabView; }}
+      >
+
+        {this.getTouchableView()}
+
+        <TouchableOpacity
+          tabLabel="Search"
+          onPress={() => this.tabView.goToPage(0)}
+        >
+          <Image
+            style={{ height: 50, width: 50 }}
+            source={imageOctocat}
+          />
         </TouchableOpacity>
+
       </ScrollableTabView>
     );
   }
@@ -96,7 +100,7 @@ export default class AppContainer extends Component {
         <TabBarIOS.Item
           title="feed"
           selected={this.state.selectedTab === 'feed'}
-          // icon={require('image!inbox')}
+          icon={imageInbox}
           onPress={() => this.setState({ selectedTab: 'feed' })}
         >
           <Text style={styles.welcome}>Tab 1</Text>
@@ -104,13 +108,13 @@ export default class AppContainer extends Component {
         <TabBarIOS.Item
           title="search"
           selected={this.state.selectedTab === 'search'}
-          // icon={require('image!inbox')}
+          icon={imageSearch}
           onPress={() => this.setState({ selectedTab: 'search' })}
         >
           <Text style={styles.welcome}>Tab 2</Text>
         </TabBarIOS.Item>
       </TabBarIOS>
-    )
+    );
   }
 
   render() {
