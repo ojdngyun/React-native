@@ -1,19 +1,28 @@
 import {
-  EMPLOYEE_UPDATE
+    EMPLOYEE_UPDATE,
+    EMPLOYEE_CREATE,
+    EMPLOYEE_EDIT_SUCCESS,
+    EMPLOYEE_FORM_RESET
 } from '../actions/types';
 
 const INITIAL_STATE = {
-  name: '',
-  phone: '',
-  shift: ''
+    name: '',
+    phone: '',
+    shift: ''
 };
 
 export default (state = INITIAL_STATE, action) => {
-  console.log(action.payload);
-  switch (action.type) {
-    case EMPLOYEE_UPDATE:
-      return { ...state, [action.payload.prop]: action.payload.value };
-    default:
-      return state;
-  }
+    switch (action.type) {
+        case EMPLOYEE_UPDATE:
+            return {...state,
+                [action.payload.prop]: action.payload.value};
+        case EMPLOYEE_CREATE:
+            return INITIAL_STATE;
+        case EMPLOYEE_EDIT_SUCCESS:
+            return INITIAL_STATE;
+        case EMPLOYEE_FORM_RESET:
+            return INITIAL_STATE;
+        default:
+            return state;
+    }
 };

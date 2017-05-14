@@ -22,24 +22,6 @@ export const passwordChanged = (text) => {
   };
 };
 
-export const loginUser = ({ email, password }) => {
-  return (dispatch) => {
-    dispatch({ type: LOGIN_USER });
-
-    firebase.auth().signInWithEmailAndPassword(email, password)
-    .then(user => loginUserSuccess(dispatch, user))
-    .catch((error) => {
-      console.log(error);
-      firebase.auth().createUserWithEmailAndPassword(email, password)
-      .then(user => loginUserSuccess(dispatch, user))
-      .catch((createUserError) => {
-        console.log(createUserError);
-        loginUserFail(dispatch);
-      });
-    });
-  };
-};
-
 const loginUserFail = (dispatch) => {
   dispatch({
     type: LOGIN_USER_FAIL,
@@ -52,4 +34,21 @@ const loginUserSuccess = (dispatch, user) => {
     payload: user,
   });
   Actions.main();
+};
+
+export const loginUser = ({ email, password }) => {
+  return (dispatch) => {
+    dispatch({ type: LOGIN_USER });
+
+    firebase.auth().signInWithEmailAndPassword(email, password)
+    .then(user => loginUserSuccess(dispatch, user))
+    .catch((error) => {
+      console.log(error);
+      firebase.auth().createUserWithEmailAndPassword(email, password)
+      .then(user => loginUserSuccess(dispatch, user))
+      .catch((createUserError) => {
+        loginUserFail(dispatch);
+      });
+    });
+  };
 };

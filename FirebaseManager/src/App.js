@@ -27,7 +27,6 @@ export default class App extends Component {
     return (
       <Provider store={store}>
         <Router />
-        {/* <LoginForm style={{ flex: 1, backgroundColor: 'black' }} /> */}
       </Provider>
     );
   }
