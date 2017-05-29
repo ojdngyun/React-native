@@ -10,6 +10,7 @@ import {
     TouchableNativeFeedback,
     TabBarIOS,
     Dimensions,
+    Modal
 } from 'react-native';
 import ScrollableTabView from 'react-native-scrollable-tab-view';
 import DefaultTab from './DefaultTab';
@@ -27,6 +28,7 @@ export default class AppContainer extends Component {
         super(props);
         this.state = {
             selectedTab: 'feed',
+            showModal: false
         };
 
         this.onPress = this.onPress.bind(this);
@@ -113,7 +115,27 @@ export default class AppContainer extends Component {
                     icon={imageSearch}
                     onPress={() => this.setState({selectedTab: 'search'})}
                 >
-                    <Text style={styles.welcome}>Tab 2</Text>
+                    <View>
+                        <Modal
+                            transparent
+                            animationType="slide"
+                            visible={this.state.showModal}
+                            onRequestClose={() => {
+                                this.setState({shoModal: false});
+                            }}
+                        >
+                            <TouchableOpacity onPress={() => {
+                                this.setState({showModal: false});
+                            }}>
+                                <Text style={styles.welcome}>Tab 2</Text>
+                            </TouchableOpacity>
+                        </Modal>
+                        <TouchableOpacity onPress={() => {
+                            this.setState({showModal: true});
+                        }}>
+                            <Text style={{backgroundColor: '#DDD', alignSelf: 'center', fontSize: 20}}>Press me!</Text>
+                        </TouchableOpacity>
+                    </View>
                 </TabBarIOS.Item>
             </TabBarIOS>
         );

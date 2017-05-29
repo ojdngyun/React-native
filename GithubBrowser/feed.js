@@ -6,8 +6,9 @@ import {
     Dimensions,
     FlatList,
     Image,
-    TouchableHighlight
+    TouchableOpacity,
 } from 'react-native';
+import FeedModal from './FeedModal';
 
 const moment = require('moment');
 
@@ -19,18 +20,24 @@ export default class Feed extends Component {
         console.log(props);
 
         this.state = {
+            showModal: false,
             showProgress: true
         };
-
         this.onPress = this.onPress.bind(this);
+        this.renderRow = this.renderRow.bind(this);
+        this.onRequestClose = this.onRequestClose.bind(this);
     }
 
     componentDidMount() {
         this.fetchFeed();
     }
 
-    onPress(value) {
-        console.log('adfasdfasd');
+    onPress() {
+        this.setState({showModal: true});
+    }
+
+    onRequestClose() {
+        this.setState({showModal: false});
     }
 
     fetchFeed() {
@@ -59,11 +66,11 @@ export default class Feed extends Component {
 
     renderRow(rowData) {
         return (
-            <TouchableHighlight
-                onPress={() => {
-                    this.onPress(0);
-                }}
+            <TouchableOpacity
                 underlayColor="#ddd"
+                onPress={() => {
+                    this.onPress();
+                }}
             >
                 <View style={styles.listItem}>
                     <Image
@@ -80,25 +87,38 @@ export default class Feed extends Component {
                         </Text>
                     </View>
                 </View>
-            </TouchableHighlight>
+            </TouchableOpacity>
         );
     }
 
     render() {
-        return (
-            <View style={[styles.container, this.props.style]}>
-                <FlatList
-                    data={this.state.data}
-                    renderItem={this.renderRow}
-                    keyExtractor={item => item.created_at}
-                    refreshing={this.state.showProgress}
-                    onRefresh={() => {
-                        this.setState({showProgress: true});
-                        this.fetchFeed();
+        if (!this.state.showModal) {
+            return (
+                <View style={[styles.container, this.props.style]}>
+                    <FlatList
+                        data={this.state.data}
+                        renderItem={this.renderRow}
+                        keyExtractor={item => item.created_at}
+                        refreshing={this.state.showProgress}
+                        onRefresh={() => {
+                            this.setState({showProgress: true});
+                            this.fetchFeed();
+                        }}
+                    />
+                </View>
+            );
+        } else {
+            return (
+                <FeedModal
+                    onRequestClose={() => {
+                        this.onRequestClose();
                     }}
+                    animationType="slide"
+                    transparent
+                    visible={this.state.showModal}
                 />
-            </View>
-        );
+            );
+        }
     }
 }
 
